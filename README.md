@@ -30,3 +30,7 @@ With `test-termination-fast.sh` in most cases kapp properly waits correctly for
 the deployment.
 
 With `test-termination-slow.sh` kapp does not properly wait.
+
+## Analyze
+
+With `test-termination-*.sh --report` you can analyze the states the deployment went through.

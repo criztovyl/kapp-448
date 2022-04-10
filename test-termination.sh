@@ -57,3 +57,5 @@ spec:
 EOF
 
 kubectl rollout status deploy $name
+
+echo watches still running, finish them with $0 --report
