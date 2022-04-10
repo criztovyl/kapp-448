@@ -1,22 +1,31 @@
 #!/usr/bin/env -S bash -ex
 
-test -f counter || echo 0 > counter
-counter=$(cat counter)
-echo $((counter+1)) > counter
-
 [ "$term_sleep" ] || term_sleep=0
 
 name=$(basename ${0%%.sh})
 
-minikube kubectl -- get events --watch --watch-only > $name-events.log &
-minikube kubectl -- get deploy $name --watch --watch-only -o json | jq '. + {ts: now|strftime("%Y-%m-%dT%H:%M:%SZ")}' > $name-deploy.json &
+case $1 in
+    --report)
+        [ -f $name-pids ] && eval kill $(cat $name-pids)
+        rm -f $name-pids
+        jq '{ts: .ts, formattedTime: .ts|strftime("%H:%M:%SZ"), generation: .metadata.generation, observedGeneration: .status.observedGeneration, unavailableReplicas: .status.unavailableReplicas}' $name-deploy.json
+        exit 0
+        ;;
+esac
 
-cleanup(){
-    kill %1 %2
-    trap - EXIT
-}
+test -f counter || echo 0 > counter
+counter=$(cat counter)
+echo $((counter+1)) > counter
 
-trap cleanup EXIT
+if ! [ -f $name-pids ]; then
+
+    kubectl get events --watch --watch-only | ts > $name-events.log &
+    kubectl get deploy $name --watch --watch-only -o json | jq --unbuffered '. + {ts: now}' > $name-deploy.json &
+
+    jobs -p > $name-pids
+    disown %1 %2
+
+fi
 
 kapp deploy -a $name -f - --yes --debug <<EOF | tee $name-kapp.log
 apiVersion: apps/v1
@@ -45,8 +54,3 @@ spec:
             value: "${counter}"
 EOF
 
-sleep $term_sleep
-
-cleanup
-
-jq '{ts: .ts, generation: .metadata.generation, observedGeneration: .status.observedGeneration, unavailableReplicas: .status.unavailableReplicas}' $name-deploy.json
