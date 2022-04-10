@@ -56,3 +56,4 @@ spec:
             value: "${counter}"
 EOF
 
+kubectl rollout status deploy $name
