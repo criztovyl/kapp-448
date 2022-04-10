@@ -8,7 +8,9 @@ case $1 in
     --report)
         [ -f $name-pids ] && eval kill $(cat $name-pids)
         rm -f $name-pids
-        jq '{ts: .ts, formattedTime: .ts|strftime("%H:%M:%SZ"), generation: .metadata.generation, observedGeneration: .status.observedGeneration, unavailableReplicas: .status.unavailableReplicas}' $name-deploy.json
+       #jq '{ts: .ts, formattedTime: .ts|strftime("%H:%M:%SZ"), generation: .metadata.generation, observedGeneration: .status.observedGeneration, unavailableReplicas: .status.unavailableReplicas, updatedReplicas: .status.updatedReplicas}' $name-deploy.json
+        jq '{generation: .metadata.generation, observedGeneration: .status.observedGeneration, unavailableReplicas: .status.unavailableReplicas, updatedReplicas: .status.updatedReplicas}' $name-deploy.json
+       #jq '{generation: .metadata.generation, observedGeneration: .status.observedGeneration, status: .status }' $name-deploy.json
         exit 0
         ;;
 esac
@@ -20,7 +22,7 @@ echo $((counter+1)) > counter
 if ! [ -f $name-pids ]; then
 
     kubectl get events --watch --watch-only | ts > $name-events.log &
-    kubectl get deploy $name --watch --watch-only -o json | jq --unbuffered '. + {ts: now}' > $name-deploy.json &
+    kubectl get deploy $name --watch -o json | jq --unbuffered '. + {ts: now}' > $name-deploy.json &
 
     jobs -p > $name-pids
     disown %1 %2
