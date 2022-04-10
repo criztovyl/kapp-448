@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
       - name: container
-        image: minikube:5000/simple
+        image: minikube:5000/terminator
         env:
           - name: TERM_SLEEP
             value: "${term_sleep}"

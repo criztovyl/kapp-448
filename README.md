@@ -18,10 +18,10 @@ minikube addons enable registry
 
 # passing --insecure-registry to start does not work with podman driver
 # https://github.com/kubernetes/minikube/issues/13932
-minikube ssh "echo CRIO_CONFIG_OPTIONS='--insecure-registry minikube:5000' | sudo tee -a /etc/default/crio; systemctl restart crio"
+minikube ssh "echo CRIO_CONFIG_OPTIONS='--insecure-registry minikube:5000' | sudo tee -a /etc/default/crio >/dev/null; sudo systemctl restart crio"
 
-podman build -t terminator
-podman push --tls-verify=false terminator $(minishift ip):5000/terminator
+podman build -t terminator .
+podman push --tls-verify=false terminator $(minikube ip):5000/terminator
 ```
 
 ## Reproduce!
