@@ -1,6 +1,7 @@
 #!/usr/bin/env -S bash -ex
 
 [ "$term_sleep" ] || term_sleep=0
+[ "$KAPP" ] || KAPP="kapp"
 
 name=$(basename ${0%%.sh})
 
@@ -29,7 +30,7 @@ if ! [ -f $name-pids ]; then
 
 fi
 
-kapp deploy -a $name -f - --yes --debug <<EOF | tee $name-kapp.log
+$KAPP deploy -a $name -f - --yes --debug <<EOF | tee $name-kapp.log
 apiVersion: apps/v1
 kind: Deployment
 metadata:
