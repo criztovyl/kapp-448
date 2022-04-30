@@ -1,3 +1,4 @@
 counter
 *-deploy.json
 *.log
+*-pids*
